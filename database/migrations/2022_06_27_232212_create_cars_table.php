@@ -15,7 +15,14 @@ return new class extends Migration
     {
         Schema::create('cars', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('model_id');
+            $table->string('license_plate', 10)->unique();
+            $table->boolean('available');
+            $table->integer('km');
             $table->timestamps();
+
+            // Chave estrangeira de model
+            $table->foreign('model_id')->references('id')->on('models');
         });
     }
 
@@ -26,6 +33,10 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('cars', function (Blueprint $table) {
+            $table->dropForeign('cars_model_id_foreign');
+        });
+
         Schema::dropIfExists('cars');
     }
 };
