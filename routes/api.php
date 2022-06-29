@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ModelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,8 +27,8 @@ use Illuminate\Support\Facades\Route;
     update  -> PUT|PATCH
     destroy -> DELETE
 */
-Route::apiResource('brand', 'App\Http\Controllers\BrandController');
-Route::apiResource('car', 'App\Http\Controllers\CarController');
-Route::apiResource('client', 'App\Http\Controllers\ClientController');
-Route::apiResource('location', 'App\Http\Controllers\LocationController');
-Route::apiResource('model', 'App\Http\Controllers\ModelController');
+Route::apiResource('brand', BrandController::class);
+Route::apiResource('car', CarController::class);
+Route::apiResource('client', ClientController::class);
+Route::apiResource('location', LocationController::class);
+Route::apiResource('model', ModelController::class);
