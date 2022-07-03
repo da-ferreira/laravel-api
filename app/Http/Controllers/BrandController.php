@@ -17,7 +17,7 @@ class BrandController extends Controller
      */
     public function index()
     {
-        return $this->brand->all();
+        return response()->json($this->brand->all(), 200);
     }
 
     /**
@@ -28,7 +28,11 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $brand = $this->brand->create($request->all());
-        return $brand;
+
+        return response()->json([
+                'message' => 'Brand added',
+                'data' => $brand,
+            ], 201);
     }
 
     /**
@@ -38,7 +42,15 @@ class BrandController extends Controller
      */
     public function show(int $id)
     {
-        return $this->brand->find($id);
+        $brand = $this->brand->find($id);
+
+        if ($brand === null) {
+            return response()->json([
+                'message' => "Cannot find brand with id {$id}"
+                ], 404);
+        }
+
+        return response()->json($brand, 200);
     }
 
     /**
@@ -49,10 +61,15 @@ class BrandController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        return $this
-            ->brand
-            ->find($id)
-            ->update($request->all());
+        $brand = $this->brand->find($id);
+
+        if ($brand === null) {
+            return response()->json([
+                'message' => "Cannot find brand with id {$id}"
+            ], 404);
+        }
+
+        return response()->json($brand->update($request->all()), 200);
     }
 
     /**
@@ -62,10 +79,18 @@ class BrandController extends Controller
      */
     public function destroy(int $id)
     {
-        $this->brand->find($id)->delete();
+        $brand = $this->brand->find($id);
 
-        return [
+        if ($brand === null) {
+            return response()->json([
+                'message' => "Cannot find brand with id {$id}"
+            ], 404);
+        }
+
+        $brand->delete();
+
+        return response()->json([
             'message' => 'The brand has been successfully removed',
-        ];
+        ], 200);
     }
 }
