@@ -27,6 +27,11 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate(
+            $this->brand->rules(),
+            $this->brand->feedback()
+        );
+
         $brand = $this->brand->create($request->all());
 
         return response()->json([
@@ -69,7 +74,23 @@ class BrandController extends Controller
             ], 404);
         }
 
-        return response()->json($brand->update($request->all()), 200);
+        if ($request->method() === 'PATCH') {
+            $dynamicRules = [];
+
+            foreach ($brand->rules() as $input => $rule) {
+                // Coleta apenas as regras aplicáveis aos parâmetros parciais da requisição
+                if (array_key_exists($input, $request->all())) {
+                    $dynamicRules[$input] = $rule;
+                }
+            }
+
+            $request->validate($dynamicRules, $brand->feedback());
+        } else {
+            $request->validate($brand->rules(), $brand->feedback());
+        }
+
+        $brand->update($request->all());
+        return response()->json($brand, 200);
     }
 
     /**
