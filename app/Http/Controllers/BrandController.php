@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 
@@ -32,7 +33,13 @@ class BrandController extends Controller
             $this->brand->feedback()
         );
 
-        $brand = $this->brand->create($request->all());
+        $image = $request->file('image');
+        $urn_image = $image->store('images', 'public');
+
+        $brand = $this->brand->create([
+            'name' => $request->name,
+            'image' => $urn_image,
+        ]);
 
         return response()->json([
                 'message' => 'Brand added',
@@ -89,7 +96,19 @@ class BrandController extends Controller
             $request->validate($brand->rules(), $brand->feedback());
         }
 
-        $brand->update($request->all());
+        // Remove a imagem antiga do storage caso uma nova imagem seja passada no update
+        if ($request->file('image')) {
+            Storage::disk('public')->delete($brand->image);
+        }
+
+        $image = $request->file('image');
+        $urn_image = $image->store('images', 'public');
+
+        $brand->update([
+            'name' => $request->name,
+            'image' => $urn_image,
+        ]);
+
         return response()->json($brand, 200);
     }
 
@@ -108,6 +127,8 @@ class BrandController extends Controller
             ], 404);
         }
 
+        // Remove a imagem do storage e apaga o registro no banco
+        Storage::disk('public')->delete($brand->image);
         $brand->delete();
 
         return response()->json([
