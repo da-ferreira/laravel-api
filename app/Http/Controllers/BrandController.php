@@ -18,7 +18,7 @@ class BrandController extends Controller
      */
     public function index()
     {
-        return response()->json($this->brand->all(), 200);
+        return response()->json($this->brand->with('models')->get(), 200);
     }
 
     /**
@@ -54,7 +54,7 @@ class BrandController extends Controller
      */
     public function show(int $id)
     {
-        $brand = $this->brand->find($id);
+        $brand = $this->brand->with('models')->find($id);
 
         if ($brand === null) {
             return response()->json([

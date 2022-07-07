@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Model as ModelsModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,5 +29,13 @@ class Brand extends Model
             'name.unique' => 'Brand name already exists',
             'name.min' => 'The name must be at least 3 characters',
         ];
+    }
+
+    /**
+     * Relacionamento entre modelo e marca. Uma marca possui muitos modelos
+     */
+    public function models()
+    {
+        return $this->hasMany(ModelsModel::class);
     }
 }
