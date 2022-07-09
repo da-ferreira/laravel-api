@@ -99,15 +99,18 @@ class BrandController extends Controller
         // Remove a imagem antiga do storage caso uma nova imagem seja passada no update
         if ($request->file('image')) {
             Storage::disk('public')->delete($brand->image);
+
+            $image = $request->file('image');
+            $urn_image = $image->store('images', 'public');
+        } else {
+            $urn_image = $brand->image;
         }
 
-        $image = $request->file('image');
-        $urn_image = $image->store('images', 'public');
+        // Sobrescreve os dados do objeto
+        $brand->fill($request->all());
+        $brand->image = $urn_image;
 
-        $brand->update([
-            'name' => $request->name,
-            'image' => $urn_image,
-        ]);
+        $brand->save();
 
         return response()->json($brand, 200);
     }

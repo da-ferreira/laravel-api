@@ -15,10 +15,30 @@ class ModelController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->model->with('brand')->get(), 200);
+        $models = [];
+
+        // Construindo a query builder
+        if ($request->has('brand_attributes')) {
+            $brand_attributes = $request->get('brand_attributes');
+            $models = $this->model->with('brand:id,' . $brand_attributes);
+        } else {
+            $models = $this->model->with('brand');
+        }
+
+        if ($request->has('attributes')) {
+            $attributes = $request->get('attributes');
+
+            $models = $models->selectRaw($attributes)->get();
+        } else {
+            $models = $models->get();
+        }
+
+        return response()->json($models, 200);
     }
 
     /**
@@ -103,20 +123,17 @@ class ModelController extends Controller
         // Remove a imagem antiga do storage caso uma nova imagem seja passada no update
         if ($request->file('image')) {
             Storage::disk('public')->delete($model->image);
+
+            $image = $request->file('image');
+            $urn_image = $image->store('images/models', 'public');
+        } else {
+            $urn_image = $model->image;
         }
 
-        $image = $request->file('image');
-        $urn_image = $image->store('images/models', 'public');
+        $model->fill($request->all());
+        $model->image = $urn_image;
 
-        $model->update([
-            'brand_id' => $request->brand_id,
-            'name' => $request->name,
-            'image' => $urn_image,
-            'number_doors' => $request->number_doors,
-            'places' => $request->places,
-            'air_bag' => $request->air_bag,
-            'abs' => $request->abs,
-        ]);
+        $model->save();
 
         return response()->json($model, 200);
     }
