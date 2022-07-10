@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Model;
+use App\Repositories\ModelRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,25 +21,24 @@ class ModelController extends Controller
      */
     public function index(Request $request)
     {
-        $models = [];
+        $modelRepository = new ModelRepository($this->model);
 
-        // Construindo a query builder
         if ($request->has('brand_attributes')) {
-            $brand_attributes = $request->get('brand_attributes');
-            $models = $this->model->with('brand:id,' . $brand_attributes);
+            $brand_attributes = 'brand:id,' . $request->get('brand_attributes');
+            $modelRepository->selectAttributesRelatedRecords($brand_attributes);
         } else {
-            $models = $this->model->with('brand');
+            $modelRepository->selectAttributesRelatedRecords('brand');
+        }
+
+        if ($request->has('filter')) {
+            $modelRepository->filter($request->get('filter'));
         }
 
         if ($request->has('attributes')) {
-            $attributes = $request->get('attributes');
-
-            $models = $models->selectRaw($attributes)->get();
-        } else {
-            $models = $models->get();
+            $modelRepository->selectAttributes($request->get('attributes'));
         }
 
-        return response()->json($models, 200);
+        return response()->json($modelRepository->get(), 200);
     }
 
     /**
